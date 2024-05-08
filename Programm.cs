@@ -1,28 +1,22 @@
 using System;
+using System.Collections.Generic;
 
-public class FirstClass
+public class User
 {
-    public event Action<string> MyEvent; 
-
-    private string _name;
-
-    public FirstClass(string name)
-    {
-        _name = name;
-    }
-
-    public void RaiseEvent()
-    {
-        MyEvent?.Invoke(_name); 
-    }
+    public string Login { get; set; }
+    public string Password { get; set; }
 }
 
-// Второй класс
-public class SecondClass
+public class UserArray<T> : GenericArray<T> where T : User
 {
-    public void HandleEvent(string eventName)
+    public UserArray(int size) : base(size) { }
+
+    public void RegisterUser(string login, string password)
     {
-        Console.WriteLine($"Обработчик второго класса: Событие сгенерировано объектом {eventName}");
+        T user = (T)Activator.CreateInstance(typeof(T));
+        user.Login = login;
+        user.Password = password;
+        Add(user);
     }
 }
 
@@ -30,14 +24,17 @@ class Program
 {
     static void Main(string[] args)
     {
-        FirstClass firstObject1 = new FirstClass("Первый объект");
-        FirstClass firstObject2 = new FirstClass("Второй объект");
-        SecondClass secondObject = new SecondClass();
+        UserArray<User> userArray = new UserArray<User>(3);
 
-        firstObject1.MyEvent += secondObject.HandleEvent; // Регистрация обработчика для первого объекта
-        firstObject2.MyEvent += secondObject.HandleEvent; // Регистрация обработчика для второго объекта
+        userArray.RegisterUser("user1", "password1");
+        userArray.RegisterUser("user2", "password2");
+        userArray.RegisterUser("user3", "password3");
 
-        firstObject1.RaiseEvent(); // Генерация события для первого объекта
-        firstObject2.RaiseEvent(); // Генерация события для второго объекта
+        Console.WriteLine("Пользователи:");
+        for (int i = 0; i < userArray.Length; i++)
+        {
+            User user = userArray.Get(i);
+            Console.WriteLine($"Логин: {user.Login}, Пароль: {user.Password}");
+        }
     }
 }
